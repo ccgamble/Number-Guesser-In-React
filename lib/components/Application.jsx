@@ -47,6 +47,11 @@ export default class Application extends Component {
     this.clearField()
   }
 
+  submitBtnClick() {
+    this.generateRandoNum();
+    this.displayMinMax();
+  }
+
 
   clearField() {
     document.getElementById('guessInput').value = ''
@@ -54,27 +59,45 @@ export default class Application extends Component {
     document.getElementById('maxNum').value = ''
   }
 
+  displayMinMax() {
+    document.getElementById('messageForMaxMin').style.display = 'block';
+  }
+
+  newGame() {
+    this.setState({
+    randomNum: '',
+    guess: '',
+    displayMessage: '',
+    minNum: '',
+    maxNum: ''
+    });
+    document.getElementById('messageForMaxMin').style.display = 'none';
+  }
+
   render() {
     return (
       <section className = 'container'>
+        {/* <section>
+          <div>
+            <button className='randomNum-btn' onClick = {this.generateRandoNum.bind(this)}>Random Num</button>
+          </div>
+          <div>{this.state.randomNum}</div>
+        </section> */}
         <section>
           <input id='minNum' placeholder='Min' onChange={this.updateMin.bind(this)}></input>
           <input id='maxNum' placeholder='Max' onChange={this.updateMax.bind(this)}></input>
+          <button className='numSubmit' onClick={this.submitBtnClick.bind(this)} >Submit</button>
         </section>
         <section>
-          <div>
-            <button className='randonum-btn' onClick = {this.generateRandoNum.bind(this)}>Random Num</button>
-          </div>
-          <div>{this.state.randomNum}</div>
-        </section>
-
-        <section>
+          <div id='messageForMaxMin' hidden>Guess a number between {this.state.minNum} and {this.state.maxNum}</div>
           <input id='guessInput' placeholder='Your best guess' onChange={this.updateGuess.bind(this)}></input>
           <button className='guess-btn' name='Guess' onClick={this.guessSubmit.bind(this)}>Guess</button>
           <button className='clear-btn' onClick={this.clearField.bind(this)}>Clear</button>
-          <div>Your last guess was {this.state.guess}</div>
+          <div>{this.state.guess ? <p>Your last guess was {this.state.guess}</p> : <p></p>}</div>
           <div>{this.state.displayMessage}</div>
         </section>
+        <button className='newGame' onClick={this.newGame.bind(this)}>New Game</button>
+
       </section>
     );
   }
