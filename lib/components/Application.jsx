@@ -1,4 +1,12 @@
 import React, { Component } from 'react';
+import ClearButton from './ClearButton'
+import GuessButton from './GuessButton'
+import GuessInput from './GuessInput'
+import MaxInput from './MaxInput'
+import MinInput from './MinInput'
+import NewGameButton from './NewGameButton'
+import SubmitButton from './SubmitButton'
+
 
 
 export default class Application extends Component {
@@ -13,38 +21,59 @@ export default class Application extends Component {
     };
   }
 
+
   generateRandoNum() {
     let max = this.state.maxNum
     let min = this.state.minNum
     this.setState(
-      {randomNum: (Math.floor(Math.random() * (max - min) + max))
+      {randomNum: (Math.floor(Math.random() * (max - min +1) + min))
       });
   }
 
   updateGuess(e) {
-    this.setState( {guess: e.target.value} )
+    let guessInput = parseInt(e.target.value)
+    this.setState( {guess: guessInput} );
   }
 
   updateMin(e) {
-    this.setState( {minNum: e.target.value})
+    let minInput = parseInt(e.target.value)
+    this.setState( {minNum: minInput});
   }
 
   updateMax(e) {
-    this.setState( {maxNum: e.target.value})
+    let maxInput = parseInt(e.target.value)
+    this.setState( {maxNum: maxInput});
   }
 
   checkGuess() {
-    if (this.state.guess > this.state.randomNum)
-      {this.setState( {displayMessage:"Your guess is too high. Guess again."})}
-    if (this.state.guess < this.state.randomNum)
-    {this.setState( {displayMessage: "Your guess is too low. Guess again."})}
-    if (this.state.guess == this.state.randomNum)
-    {this.setState( {displayMessage: "You guessed correctly!"})}
+    if (this.state.guess == this.state.randomNum) {
+      this.winGame()
+    } else if (this.state.maxNum >= this.state.guess && this.state.guess > this.state.randomNum) {
+      this.setState( {displayMessage:"Your guess is too high. Guess again."});
+    } else if (this.state.minNum <= this.state.guess && this.state.guess < this.state.randomNum) {
+      this.setState( {displayMessage: "Your guess is too low. Guess again."});
+    } else if (isNaN(this.state.guess) || this.state.guess === "") {
+      this.setState( {displayMessage: "Your guess was not a number."});
+    } else {
+      this.setState( {displayMessage: "Your guess was not in range. Guess again."});
+    }
+  }
+
+  winGame() {
+    this.setState({
+      minNum: (this.state.minNum - 10),
+      maxNum: (this.state.maxNum + 10),
+      guess: '',
+      displayMessage: "You guessed correctly!"
+    });
+    document.getElementById('max-min').style.display = 'none';
+    this.generateRandoNum()
+    this.displayMinMax()
   }
 
   guessSubmit() {
-    this.checkGuess()
-    this.clearField()
+    this.checkGuess();
+    this.clearField();
   }
 
   submitBtnClick() {
@@ -54,13 +83,13 @@ export default class Application extends Component {
 
 
   clearField() {
-    document.getElementById('guessInput').value = ''
-    document.getElementById('minNum').value = ''
-    document.getElementById('maxNum').value = ''
+    document.getElementById('guessInput').value = '';
+    document.getElementById('minNum').value = '';
+    document.getElementById('maxNum').value = '';
   }
 
   displayMinMax() {
-    document.getElementById('messageForMaxMin').style.display = 'block';
+    document.getElementById('guess-range-message').style.display = 'block';
   }
 
   newGame() {
@@ -71,32 +100,30 @@ export default class Application extends Component {
     minNum: '',
     maxNum: ''
     });
-    document.getElementById('messageForMaxMin').style.display = 'none';
+    document.getElementById('max-min').style.display = 'block';
+    document.getElementById('guess-range-message').style.display = 'none';
   }
+
 
   render() {
     return (
       <section className = 'container'>
-        {/* <section>
-          <div>
-            <button className='randomNum-btn' onClick = {this.generateRandoNum.bind(this)}>Random Num</button>
-          </div>
-          <div>{this.state.randomNum}</div>
-        </section> */}
-        <section>
-          <input id='minNum' placeholder='Min' onChange={this.updateMin.bind(this)}></input>
-          <input id='maxNum' placeholder='Max' onChange={this.updateMax.bind(this)}></input>
-          <button className='numSubmit' onClick={this.submitBtnClick.bind(this)} >Submit</button>
+      <h1>Number Guesser In React</h1>
+        <section id='max-min'>
+          <MinInput updateMin={this.updateMin.bind(this)} />
+          <MaxInput updateMax={this.updateMax.bind(this)} />
+          <SubmitButton minNum={this.state.minNum} maxNum={this.state.maxNum} submitBtnClick={this.submitBtnClick.bind(this)} />
         </section>
+
         <section>
-          <div id='messageForMaxMin' hidden>Guess a number between {this.state.minNum} and {this.state.maxNum}</div>
-          <input id='guessInput' placeholder='Your best guess' onChange={this.updateGuess.bind(this)}></input>
-          <button className='guess-btn' name='Guess' onClick={this.guessSubmit.bind(this)}>Guess</button>
-          <button className='clear-btn' onClick={this.clearField.bind(this)}>Clear</button>
+          <div id='guess-range-message' hidden>Guess a number between {this.state.minNum} and {this.state.maxNum}</div>
+          <GuessInput updateGuess={this.updateGuess.bind(this)} />
+          <GuessButton guess={this.state.guess} guessSubmit= {this.guessSubmit.bind(this)} />
+          <ClearButton guess={this.state.guess} clearField={this.clearField.bind(this)} />
           <div>{this.state.guess ? <p>Your last guess was {this.state.guess}</p> : <p></p>}</div>
           <div>{this.state.displayMessage}</div>
         </section>
-        <button className='newGame' onClick={this.newGame.bind(this)}>New Game</button>
+        <NewGameButton displayMessage= {this.state.displayMessage} newGame= {this.newGame.bind(this)} />
 
       </section>
     );
